@@ -1,0 +1,1 @@
+This is a helper program for **magic_square_of_squares** to get a number with a large number of factors that are square numbers.
