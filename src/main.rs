@@ -1,28 +1,29 @@
-use std::time::Instant;
+mod constants;
 
-use rayon::prelude::*;
+use std::{str::FromStr, time::Instant};
 
-#[inline(always)]
-fn is_square_number(number: usize) -> bool {
-    let sqrt: usize = (number as f64).sqrt() as usize;
-    sqrt * sqrt == number
+use constants::HIGHLY_COMPOSITE_NUMBERS;
+use num::BigInt;
+
+fn is_square_number(number: BigInt) -> bool {
+    let sqrt: BigInt = number.sqrt();
+    &sqrt * &sqrt == number
 }
 
-#[inline(always)]
-fn get_square_factors(input: usize) -> Vec<usize> {
-    (2..(input as f64).sqrt() as usize)
-        .filter(|number: &usize| input % number == 0)
-        .filter(|number: &usize| is_square_number(*number))
-        .collect()
-}
+fn get_square_factors(input: BigInt) -> Vec<BigInt> {
+    let sqrt: BigInt = input.sqrt();
+    let mut number: BigInt = BigInt::from(2);
+    let mut square_factors: Vec<BigInt> = vec![];
 
-fn get_number_with_most_square_factors(limit: usize) -> usize {
-    (2..limit)
-        .par_bridge()
-        .map(|number: usize| (number, get_square_factors(number).len()))
-        .max_by_key(|&(_, count)| count)
-        .map(|(number, _)| number)
-        .unwrap()
+    while number < sqrt {
+        if input.clone() % number.clone() == BigInt::ZERO && is_square_number(number.clone()) {
+            square_factors.push(number.clone());
+        }
+
+        number += 1;
+    }
+
+    square_factors
 }
 
 fn main() {
@@ -31,13 +32,13 @@ fn main() {
     // let number_with_most_square_factors: usize = 6350400;
     // let number_with_most_square_factors: usize = 76204800;
 
-    let limit: usize = 100000000;
+    let number: BigInt = BigInt::from_str(HIGHLY_COMPOSITE_NUMBERS[0]).unwrap();
 
-    let number_with_most_square_factors: usize = get_number_with_most_square_factors(limit);
-    println!(
-        "Below {}, the number with most square factors is {}",
-        limit, number_with_most_square_factors
-    );
+    let square_factors_count: usize = get_square_factors(number.clone()).len();
+
+    println!("{:?}", get_square_factors(number));
+
+    println!("{}", square_factors_count);
 
     let end_time: Instant = Instant::now();
 
